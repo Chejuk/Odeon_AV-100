@@ -1,0 +1,16 @@
+RC buttons codes table
+ST-BY           128
+MUTE            130
+INPUT SEL       132
+RESET           134
+MODE            135
+AM/FM           138
+<-TUNE          140
+TUNE->          142
+MEMORY          129
+<-PRESELECT     131
+PRESELECT->     133
+VOLUME UP       135
+CHANNEL UP      137
+VOLUME DOWN     139
+CHANNEL DOWN    141
