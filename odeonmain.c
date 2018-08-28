@@ -12,6 +12,8 @@
 #include "tools/ledsdisp.h"
 #include "tools/ir.h"
 #include "tools/tools.h"
+#include "tools/i2c.h"
+#include "tools/eeprom.h"
 
 //__CONFIG(HS & WDTDIS & LVPDIS & DEBUGEN & WRTEN);    
 __CONFIG(FOSC_HS & LVP_OFF & DEBUG_ON & WDTE_OFF);
@@ -44,6 +46,10 @@ int main(int argc, char** argv) {
     ir_init();
     leds_init();   
     encoder_init();
+    
+    __delay_ms(500);
+    i2c_init();
+    eeprom_init();
 
     GIE = 1; //interrupt enable
 
