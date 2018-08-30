@@ -22,19 +22,14 @@
 
 void i2c_start(void);
 void i2c_stop(void);
-//bool i2c_send_byte(uint8_t data);
-//uint8_t i2c_read_byte(uint8_t ask);
-//void i2c_restart(void);
 
-//bool I2C_Read(char Address,char *Data, char Num);
-//bool I2C_Send(char Address,char *Data,char Num);
 
 void i2c_init()
 {
     TRISB7 = 0; //set RB7 as output
     TRISB6 = 0; //set RB6 (SDA) as output
     OPTION_REGbits.nRBPU = 1; //PORTB pull up
-    
+   /* 
     char data[2];
     //data[0] = 0xFF;// Mute on for address 0x94 pt2323
     __delay_ms(500);
@@ -42,18 +37,23 @@ void i2c_init()
     data[0] = 0x00; //SPEAKER ATTENUATION OUT 1
     data[1] = 0xC0; //mute TDA7448
     
+    uint8_t addr = 0xa0;
+    
     while(1) {
         __delay_ms(1000);
-//        I2C_Read(0xA0, data, 2);
-        
+        if(!I2C_Send(addr, data, 2)) {
+            addr += 2;
+            if((addr == 0x94) || (addr == 0x88))
+                addr += 2;
+        }
         
         // pt2323 test
         //I2C_Send(0x94, data, 1);
         
         //tda7448 test 
-        I2C_Send(0x88, data, 2);
+        //I2C_Send(0x88, data, 2);        
     };
-
+*/
 }
 
 void i2c_stop(void)
@@ -220,169 +220,3 @@ void i2c_start(void)
     SCL_DOWN();
     TRISB7 = 0;
 }
-
-//void i2c_restart(void)
-//{
-//    SDA_OUT();
-//    SDA_SET(1);
-//    I2C_DELAY();
-//    SCL_UP();
-//	I2C_DELAY();
-//		
-//    SDA_SET(0);
-//    I2C_DELAY();
-//    SCL_DOWN();
-//	I2C_DELAY();
-//}
-
-/*
-void i2c_reset()
-{
-    i2c_start();
-    
-    for(uint8_t kx = 0; kx < 9; kx++) {
-        SCL_DOWN();
-        I2C_DELAY();
-        SCL_UP();
-        I2C_DELAY();
-    };
-    
-    SCL_DOWN();
-    i2c_start();
-    i2c_stop();
-}
-
-bool i2c_send_byte(uint8_t data)
-{
-	bool ask = true;
-    
-	SCL_DOWN();
-    SDA_OUT();
-    I2C_DELAY();
-		
-	for(uint8_t i = 0; i < 8; i++) {
-		if((data & 0x80) == 0) {
-			SDA_SET(0);
-		} else {
-			SDA_SET(1);
-		}
-		I2C_DELAY();
-        SCL_UP();
-        I2C_DELAY();
-		SCL_DOWN();
-        
-		data = (data << 1);
-	}
-			
-	SDA_SET(1);
-    SDA_IN();
-	I2C_DELAY();
-	SCL_UP();
-	I2C_DELAY();
-    
- //   while(SDA_GET == 1) {}; //TODO:
-    
-    if(SDA_GET == 1) {
-        ask = false;
-    } else {
-        ask = true;
-    }
-		
-	SCL_DOWN();
-    I2C_DELAY();
-			
-return ask;
-}
-
-uint8_t i2c_read_byte(uint8_t ask)
-{
-	uint8_t byte = 0;
-	
-    SDA_OUT();	
-	SDA_SET(1);
-    SDA_IN();
-		
-	for(uint8_t i = 0; i < 8; i++) {
-		byte = (byte << 1);
-        SCL_UP();//		ONE_SCL();
-        I2C_DELAY();
-        if(SDA_GET == 1) byte |= 0x01;
-        SCL_DOWN();
-        I2C_DELAY();
-	};
-			
-    SDA_OUT();
-    if(ask == ACK)	{
-		SDA_SET(0);
-	} else {
-		SDA_SET(1);
-	};
-    
-    I2C_DELAY();
-    SCL_UP();//	ONE_SCL();
-	I2C_DELAY();
-	SCL_DOWN();//	NULL_SCL();
-//	I2C_DELAY();
-	SDA_SET(1);//	ONE_SDA();
-			
-return byte;
-}
-*/
-
-/*
-bool i2c_block_write(uint8_t address, uint8_t *data, uint8_t len, bool stop)
-{
-   i2c_start();
-    
-    address &= ~0x01;
-    if(!i2c_send_byte(address)) return false;
-    
-    for(uint8_t kx = 0; kx < len; kx++) {
-        if(!i2c_send_byte(*data)) return false;
-        data++;
-    };   
-    
-    if(stop) {
-        i2c_stop();
-    }
-    __delay_ms(5);
-    
-return true;
-}
-
-bool i2c_block_read(uint8_t address, uint8_t *data, uint8_t len)
-{
-    i2c_start();
-    
-    address |= 0x01;
-    if(!i2c_send_byte(address)) return false;
-    
-    for(uint8_t kx = 0; kx < len - 1; kx++) {
-        *data = i2c_read_byte(ACK);
-        data++;
-    };
-    *data = i2c_read_byte(NACK);
-    
-    i2c_stop();
-    
-return true;
-}
-
-bool i2c_data_read(uint8_t device_address, uint8_t data_address, uint8_t *data, uint8_t len)
-{
-    uint8_t addr_dat = data_address;
-    
-    if(!i2c_block_write(device_address, &addr_dat, 1, false)) {
-        i2c_stop();
-        i2c_reset();
-        return false;
-    }
-    
-    if(!i2c_block_read(device_address, data, len)) {
-        i2c_reset();
-        return false;
-    }
-    
-return true;
-}
-*/

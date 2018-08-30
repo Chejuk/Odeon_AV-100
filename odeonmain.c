@@ -20,6 +20,7 @@ __CONFIG(FOSC_HS & LVP_OFF & DEBUG_ON & WDTE_OFF);
 
 
 volatile uint16_t dVal = 0;//xFFFF;
+struct Save_Parameters  parameters;
 
 /*
  * Main priject function
@@ -49,7 +50,8 @@ int main(int argc, char** argv) {
     
     __delay_ms(500);
     i2c_init();
-    eeprom_init();
+    parameters_read();
+    //eeprom_init();
 
     GIE = 1; //interrupt enable
 
@@ -87,12 +89,17 @@ static void interrupt isr(void)	// Here be interrupt function - the name is unim
         T0IF = 0;		// Clear interrupt flag, ready for next
     };
     
+    //Comparator interrupt
+    // On IR signal
     if(CMIF) {
         ir_isr();
         //ADIF = 0;
         CMIF = 0;
     }   
 
+    
+    //Timer interrupt
+    // On main timer tick
     if(TMR2IF) {
     //    PORTBbits.RB3 = !PORTBbits.RB3;
         dVal += encoder_inc();

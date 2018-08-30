@@ -1,6 +1,6 @@
 /* 
  * File:   eeprom.h
- * Author: root
+ * Author: Anatoly Palto
  *
  * Created on 19 07 2018 , 12:18
  */
@@ -14,8 +14,20 @@
 #ifdef	__cplusplus
 extern "C" {
 #endif
+    #define FLAG    0x0D
 
-    extern void eeprom_init();
+    struct Save_Parameters {
+        uint8_t flag;
+        uint8_t Input;
+        uint8_t Value;
+        int8_t  OutValues[6];
+        uint8_t crc;
+    };
+
+    //extern void eeprom_init();
+    extern void parameters_write();
+    extern void parameters_read();
+    extern uint8_t Crc8(uint8_t *pcBlock, uint32_t len);
 
 
 #ifdef	__cplusplus

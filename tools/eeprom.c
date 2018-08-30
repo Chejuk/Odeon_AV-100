@@ -11,6 +11,8 @@
 
 #include "../init.h"
 #include "i2c.h"
+#include "tools.h"
+#include "inputset.h"
 
 static const uint8_t    eeprom_address = 0xA0;//0x94;//0xA0;
 static bool             eeprom_enable = false;
@@ -18,9 +20,49 @@ static bool             eeprom_valid = false;
 static uint8_t eeprom_data[16];
 
 #define FLAG    0x0D
+#define START_ADDRESSES 0x02
 
-bool eeprom_byte_write(uint8_t byte_addr, uint8_t byte);
+void parameters_write()
+{
+    parameters.flag = FLAG;
+    parameters.crc = Crc8((uint8_t*) &parameters, sizeof(parameters) - 1);
+    
+    uint8_t addr = START_ADDRESSES;
+    uint8_t*    pp = (uint8_t*) &parameters;
+    for(uint8_t kx = 0; kx < sizeof(parameters); kx++) {
+        eeprom_write(addr, *pp);
+        pp++;
+        addr++;
+    }
+}
 
+void parameters_read()
+{
+    uint8_t kx;
+    uint8_t addr = START_ADDRESSES;
+    uint8_t*    pp = (uint8_t*) &parameters;
+    for(kx = 0; kx < sizeof(parameters); kx++) {
+        *pp = eeprom_read(addr);
+        pp++;
+        addr++;
+    };
+    
+    uint8_t crc = Crc8((uint8_t*) &parameters, sizeof(parameters) - 1);
+    if((crc != parameters.crc) && (parameters.flag != FLAG)) {
+        // init default parameters;
+        parameters.Input = INPUT_6CH;
+        parameters.Value = 15;
+        for(kx = 0; kx < 6; kx++) {
+            parameters.OutValues[kx] = 0;
+        };
+        parameters_write();
+    }
+}
+
+//bool eeprom_byte_write(uint8_t byte_addr, uint8_t byte);
+
+
+/*
 void eeprom_init()
 {
  //   i2c_reset();
@@ -58,4 +100,19 @@ bool eeprom_byte_write(uint8_t byte_addr, uint8_t byte)
 {
     uint8_t sb = byte;
     return I2C_Send(byte_addr, &sb, 1);
+}
+*/
+uint8_t Crc8(uint8_t *pcBlock, uint32_t len)
+{
+    uint8_t crc = 0xFF;
+    uint32_t i;
+
+    while (len--)  {
+        crc ^= *pcBlock++;
+
+        for (i = 0; i < 8; i++)
+            crc = crc & 0x80 ? (crc << 1) ^ 0x31 : crc << 1;
+    }
+
+    return crc;
 }
