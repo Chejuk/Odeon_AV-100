@@ -50,7 +50,7 @@ void parameters_read()
     uint8_t crc = Crc8((uint8_t*) &parameters, sizeof(parameters) - 1);
     if((crc != parameters.crc) && (parameters.flag != FLAG)) {
         // init default parameters;
-        parameters.Input = INPUT_6CH;
+        parameters.Input = 0;
         parameters.Value = 15;
         for(kx = 0; kx < 6; kx++) {
             parameters.OutValues[kx] = 0;

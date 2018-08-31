@@ -130,8 +130,8 @@ void ir_isr()
                     ir_puls.new = true;
                     ir_puls.start = false;
                     IR_State = Idle;
-                    uint8_t tv = (uint8_t) (ir_puls.value & 0x000000FF);
-                    if(tv != dVal) dVal = tv;
+                    ir_puls.code = (uint8_t) (ir_puls.value & 0x000000FF);
+//                    if(tv != dVal) dVal = tv;
 
                 } else {
                     ir_puls.count += 1;
@@ -178,8 +178,9 @@ void ir_isr()
         TEST(1);
         IR_State = Idle;
 
-        uint8_t tv = (uint8_t) (ir_puls.value & 0x000000FF);
-        if(tv != dVal) dVal = tv;
+        ir_puls.code = (uint8_t) (ir_puls.value & 0x000000FF);
+        //uint8_t tv = (uint8_t) (ir_puls.value & 0x000000FF);
+//        if(tv != dVal) dVal = tv;
 
         }; break;
         
@@ -193,7 +194,7 @@ void ir_isr()
             ir_puls.stop = false;
             ir_puls.repeate = false; 
             TEST(0);
-            dVal = 0;
+//            dVal = 0;
         };
  //       dVal = 0;
     };
@@ -228,4 +229,30 @@ bool ir_check()
     }
 
 return false;
+}
+
+uint8_t ir_code_get()
+{
+    static uint16_t power_on_timer = 0;
+
+    if(power_on_timer) power_on_timer--;
+    
+    if(ir_puls.new) {
+        static uint8_t ir_code_prev = 0;
+        uint8_t code = ir_puls.code;
+        
+        if(code == CODE_ST_BY) {
+            if((code == ir_code_prev) && (power_on_timer > 0)) {
+                code = 0;
+            } else power_on_timer = 300 / MAINT_INTERRUPT_TIMEOUT_MS;
+        } else {
+            power_on_timer = 0;
+        };
+        
+        ir_setIdle();
+        ir_code_prev = ir_puls.code;               
+        return code;
+    };
+    
+    return 0;
 }

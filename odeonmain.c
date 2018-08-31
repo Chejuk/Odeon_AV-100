@@ -48,32 +48,35 @@ int main(int argc, char** argv) {
     leds_init();   
     encoder_init();
     
-    __delay_ms(500);
+    __delay_ms(100);
     i2c_init();
     parameters_read();
     //eeprom_init();
 
     GIE = 1; //interrupt enable
 
-//    symbols_set4((uint16_t) ir_puls.value); while(1) {};
+//    symbols_set4((uint16_t) ir_puls.value); 
+//    while(1) {};
     
 //  uint8_t time = 0;
-    volatile uint16_t disp = 0;
+ //   volatile uint16_t disp = 0;
  
-    dVal =  9012;
+ //   dVal =  9012;
+    
    	for(;;) {
+        main_run();
 //		CLRWDT();	// Idly kick the dog
 //        time++;
-        __delay_ms(100);
+        __delay_ms(50);
 //        symbols_set4(time);
 //        symbol_setValue(ir_puls.count);
 //        symbol_setValue(time);
 //        if(ir_puls.new) {
 ////            symbols_set4((uint16_t) ir_puls.value);
-        if(disp != dVal) {
-            disp = dVal;
-            symbols_set4(disp);
-        };
+//        if(disp != dVal) {
+//            disp = dVal;
+//            symbols_set4(disp);
+//        };
 //            ir_puls.new = false;
 //        };
     };
@@ -102,10 +105,12 @@ static void interrupt isr(void)	// Here be interrupt function - the name is unim
     // On main timer tick
     if(TMR2IF) {
     //    PORTBbits.RB3 = !PORTBbits.RB3;
-        dVal += encoder_inc();
-        //leds_next();        
-        if(!ir_check()) 
-            leds_next();
+//        dVal += encoder_inc();
+//        //leds_next();        
+//        if(!ir_check()) 
+//            leds_next();
+        
+        timer_interrupt_run();
         TMR2IF = 0;
    };    
         

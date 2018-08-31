@@ -31,6 +31,22 @@
 //#define TIMEOUT_REPEATE_PREP   390   // 2.2 msec
 //#define TIMEOUT_REPEATE_LOW         // 0.6 msec
 
+#define CODE_ST_BY           (uint8_t) 128
+#define CODE_MUTE            (uint8_t) 130
+#define CODE_INPUT_SEL       (uint8_t) 132
+#define CODE_RESET           (uint8_t) 134
+#define CODE_MODE            (uint8_t) 135
+#define CODE_AM_FM           (uint8_t) 138
+#define CODE_TUNE_PR         (uint8_t) 140
+#define CODE_TUNE_NX         (uint8_t) 142
+#define CODE_MEMORY          (uint8_t) 129
+#define CODE_PRESELECT_PR    (uint8_t) 131
+#define CODE_PRESELECT_NX    (uint8_t) 133
+#define CODE_VOLUME_UP       (uint8_t) 135
+#define CODE_CHANNEL_UP      (uint8_t) 137
+#define CODE_VOLUME_DOWN     (uint8_t) 139
+#define CODE_CHANNEL_DOWN    (uint8_t) 141
+
 
 #ifdef	__cplusplus
 extern "C" {
@@ -43,6 +59,7 @@ extern "C" {
         uint8_t count;
         bool    repeate;
         uint32_t    value;
+        uint8_t code;
     };
 
     extern struct IrPuls ir_puls;
@@ -51,6 +68,7 @@ extern "C" {
     extern void ir_isr();
     extern void ir_setIdle();
     extern bool ir_check();
+    extern uint8_t ir_code_get();
 
 #ifdef	__cplusplus
 }

@@ -28,7 +28,9 @@ bool value_common(uint8_t Value)
         int8_t val = 80 - (Value + parameters.OutValues[kx]);
         if(val < 0) val = 0;
         if(val > 80) val = 80;
-        if(val > 71) {
+        if(val == 80) {
+            data[kx + 1] = 0xC0;
+        } else if(val > 71) {
             data[kx + 1] = 0x80;
             val -= 72;
         } else data[kx + 1] = 0;
@@ -42,11 +44,11 @@ bool value_channel(uint8_t num, int8_t value)
 {
     if(num > 6) return false;
     
-    if(value > 15) value = 15;
-    if(value < -15) value = -15;
+    if(value > CHANNEL_VOLUME_MAX) value = CHANNEL_VOLUME_MAX;
+    if(value < -CHANNEL_VOLUME_MAX) value = -CHANNEL_VOLUME_MAX;
     
     parameters.OutValues[num] = value;
-    parameters.crc = Crc8((uint8_t*) &parameters, sizeof(parameters) - 1);
+//    parameters.crc = Crc8((uint8_t*) &parameters, sizeof(parameters) - 1);
     
     uint8_t data[2];
     data[0] = num;
@@ -56,4 +58,15 @@ bool value_channel(uint8_t num, int8_t value)
         data[1] = 0x80 + (data[1] - 72);
     
 return I2C_Send(volume_ctrl_addresses, data, 2);
+}
+
+void parameters_outval_add(uint8_t num, int8_t val)
+{
+    if(num > 5) return;
+    
+    parameters.OutValues[num] += val;
+    if(parameters.OutValues[num] > (int8_t) CHANNEL_VOLUME_MAX)
+        parameters.OutValues[num] = CHANNEL_VOLUME_MAX;
+    else if(-parameters.OutValues[num] > (int8_t) CHANNEL_VOLUME_MAX)
+        parameters.OutValues[num] = -CHANNEL_VOLUME_MAX;
 }

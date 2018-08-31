@@ -15,11 +15,15 @@
 extern "C" {
 #endif
 
-#define INPUT_6CH       0x07
-#define INPUT_STEREO_1  0x0B
-#define INPUT_STEREO_2  0x0A
-#define INPUT_STEREO_3  0x09
-#define INPUT_STEREO_4  0x08
+#define INPUT_6CH       (uint8_t) 0x07
+#define INPUT_STEREO_1  (uint8_t) 0x0B
+#define INPUT_STEREO_2  (uint8_t) 0x0A
+#define INPUT_STEREO_3  (uint8_t) 0x09
+#define INPUT_STEREO_4  (uint8_t) 0x08
+#define INPUT_AUX   INPUT_STEREO_1
+#define INPUT_FM    INPUT_STEREO_2
+    
+const uint8_t input_channels[5] = {INPUT_6CH, INPUT_AUX, INPUT_STEREO_3, INPUT_STEREO_4, INPUT_FM};
     
 #define MUTE_FL     0
 #define MUTE_FR     1

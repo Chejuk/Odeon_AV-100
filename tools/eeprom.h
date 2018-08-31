@@ -19,7 +19,7 @@ extern "C" {
     struct Save_Parameters {
         uint8_t flag;
         uint8_t Input;
-        uint8_t Value;
+        int8_t  Value;
         int8_t  OutValues[6];
         uint8_t crc;
     };

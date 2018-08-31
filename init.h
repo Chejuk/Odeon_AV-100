@@ -23,8 +23,10 @@ extern "C" {
 #define TEST(x) PORTBbits.RB3 = x
     
     extern volatile uint8_t portA;
-    extern volatile uint16_t dVal;
+    //extern volatile uint16_t dVal;
 
+    extern void main_run();
+    extern void timer_interrupt_run();
 
 
 #ifdef	__cplusplus

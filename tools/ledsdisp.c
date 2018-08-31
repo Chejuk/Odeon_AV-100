@@ -14,21 +14,6 @@
 #include "../init.h"
 #include "ledsdisp.h"
 
-/*   A
- * F   B
- *   G
- * E   C
- *   D   P 
- *  */
-
-#define LED_A   (1 << 2)
-#define LED_B   (1 << 4)
-#define LED_C   (1 << 5)
-#define LED_D   (1 << 6)
-#define LED_E   (1 << 7)
-#define LED_F   (1 << 3)
-#define LED_G   (1 << 0)
-#define LED_P   (1 << 1)
 
 //disply symbols defines
 const uint8_t symbols[] = {(LED_A | LED_B | LED_C | LED_D | LED_E | LED_F),
@@ -41,6 +26,7 @@ const uint8_t symbols[] = {(LED_A | LED_B | LED_C | LED_D | LED_E | LED_F),
 (LED_A | LED_B | LED_C ), // 7
 (LED_A | LED_B | LED_C | LED_D | LED_E | LED_F | LED_G),//8
 (LED_A | LED_B | LED_C | LED_D | LED_G | LED_F), // 9
+(LED_G), // - 
 (LED_A | LED_G | LED_E | LED_F), // F
 (LED_A | LED_C | LED_D | LED_G | LED_F), // S
 (LED_A | LED_E | LED_D | LED_F), // C
@@ -50,7 +36,7 @@ const uint8_t symbols[] = {(LED_A | LED_B | LED_C | LED_D | LED_E | LED_F),
 }; 
 
 uint8_t disp[5] = {0,0,0,0,0};
-volatile uint8_t portA = 0;
+volatile uint8_t portA = 0xFF;
 
 
 void leds_init()
@@ -61,7 +47,9 @@ void leds_init()
     TRISA &= ~(0x0E); //RA 1-3 as output
     TRISB &= ~(0x03);   // RB 0,1 as output
     
-    memset(disp, symbols[8] + LED_P, sizeof(disp));
+    //memset(disp, symbols[8] + LED_P, sizeof(disp));
+    //memset(disp, LED_POWER, sizeof(disp));
+    //SymbolSet(4, LED_POWER);
     
     SymbolOff();
     /*
@@ -107,13 +95,25 @@ void leds_next()
     if(c_rank > 4) c_rank = 0;
 }
 
-void symbol_setValue(uint8_t value)
+void symbol_setValue(int8_t value)
 {
     uint8_t tv;
-    tv = (uint8_t) (value % 10);
-    SymbolSetNum(3,tv);
-    tv = (uint8_t) ((value/10) % 10);
-    SymbolSetNum(2,tv);
+    
+    if(value < 0) {
+        tv = -value;
+        if(tv > 9) tv = 0;
+        SymbolSetNum(3,tv);
+        SymbolSetNum(2, 10);
+    } else {
+        tv = (uint8_t) (value % 10);
+        SymbolSetNum(3,tv);
+        tv = (uint8_t) ((value/10) % 10);
+        if(tv == 0) {
+            SymbolSet(2, 0);
+        } else {
+            SymbolSetNum(2,tv);
+        };            
+    };
 }
 
 void symbols_set4(uint16_t val)
@@ -131,4 +131,18 @@ void symbols_set4(uint16_t val)
     tv16 /= 10;  tv = (uint8_t) (tv16 % 10);
     SymbolSetNum(0,tv);
     
+}
+
+void led_switch(uint8_t leds, bool On)
+{
+    if(On) {
+        SymbolAdd(4, leds);
+    } else {
+        SymbolRm(4, leds);
+    }
+}
+
+void leds_clr()
+{
+    memset(disp, 0, sizeof(disp));
 }
