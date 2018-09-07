@@ -19,7 +19,8 @@
 #define TIMEOUT_IDLY    15000
 
 // 20 MHz /4 = 5MHz / prescale 8 = 625 kHz =>  1 msec = 625 tick
-#define TIMEOUT_START   7040//7021..7058:7040 +/- 19;       7188 = 11.5 msec
+#define TIMEOUT_START_MIN   7025
+#define TIMEOUT_START   (TIMEOUT_START_MIN + TIMEOUT_ACC / 2)//7021..7058:7040 +/- 19;       7188 = 11.5 msec
 
 #define TIMEOUT_PREP    3518 //3503 .. 3535: 3518 +/- 15;   2813 = 4.5 msec
 #define TIMEOUT_LOW     371  //345 .. 397: 371 +/- 28;      406 = 0.65 msec

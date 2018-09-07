@@ -33,18 +33,7 @@ void ir_init()
     TRISA |= 0x01;    // PORTA RA0 as input
     PORTA |= 0x01;     // set RA0 to hight
 
-    /*
-    // ADC init, AN0
-    //Right justified. 
-    //FOSC /16; Vref=Vdd; AN0
-    ADCON1 = 0xCE;
-    ADCON0 = 0x41; //On chanel0
-    ADIF = 0;
-    ADIE = 1;
-    */
-    
-    //Vref to Vdd
-    //ADCON1 = 0xCE;
+
     //Comparatot init
     CMCON = 0x06;//0x01; 0x06
     CVRCON = 0x88;
@@ -65,7 +54,6 @@ void ir_init()
 
 void ir_isr()
 {
- //   uint16_t adc_val = (ADRESH & 0x03) * 256 + ADRESL;
     static volatile uint16_t prevTimer = 0;
     
     volatile uint16_t        tmr = TMR1;
@@ -81,8 +69,10 @@ void ir_isr()
     
     if(CMCONbits.C1OUT) {
         isLow = true;
+        TEST(1);
     } else {
         isLow = false;
+        TEST(0);
     }
     
     switch (IR_State) {
@@ -93,13 +83,24 @@ void ir_isr()
                 ) {
                 IR_State = Prep;
                 prevTimer = tmr;
+                ir_puls.start = true;
                 TEST(1);
+#ifdef _DEBUG_
+        debug_value = (uint8_t) (timeout - 6980);
+#endif
+
             } else if((timeout > (uint16_t) (TIMEOUT_REPEATE_START - TIMEOUT_ACC)) 
               && (timeout < (uint16_t) (TIMEOUT_REPEATE_START + TIMEOUT_ACC))
                 ){
                 IR_State = Repeate_Prep;
                 prevTimer = tmr;
+                ir_puls.start = true;
                 TEST(1);
+#ifdef _DEBUG_
+debug_value = (uint8_t) (timeout - 6980);
+#endif
+            } else {
+                IR_State = Idle;
             };
         }; break;
             
@@ -190,7 +191,7 @@ void ir_isr()
             prevTimer = tmr;
             IR_State = Start;
             ir_puls.new = false;
-            ir_puls.start = true;
+            ir_puls.start = false;
             ir_puls.stop = false;
             ir_puls.repeate = false; 
             TEST(0);

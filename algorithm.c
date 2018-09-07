@@ -90,10 +90,10 @@ void timer_interrupt_run()
         leds_next();
     
     ir_code = ir_code_get();
-#ifdef _DEBUG_
-    if(ir_code)
-        debug_value = ir_code;
-#endif
+//#ifdef _DEBUG_
+//    if(ir_code)
+//        debug_value = ir_code;
+//#endif
 
     
     if(mute_on) {
