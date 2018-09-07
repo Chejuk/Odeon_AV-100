@@ -22,9 +22,7 @@ extern "C" {
 #define INPUT_STEREO_4  (uint8_t) 0x08
 #define INPUT_AUX   INPUT_STEREO_1
 #define INPUT_FM    INPUT_STEREO_2
-    
-const uint8_t input_channels[5] = {INPUT_6CH, INPUT_AUX, INPUT_STEREO_3, INPUT_STEREO_4, INPUT_FM};
-    
+        
 #define MUTE_FL     0
 #define MUTE_FR     1
 #define MUTE_CT     2
@@ -37,14 +35,14 @@ const uint8_t input_channels[5] = {INPUT_6CH, INPUT_AUX, INPUT_STEREO_3, INPUT_S
     enum Select_Input {
         Input_None,
         Input_Set,
-        Input_Mute_Enable,
-        Input_Mute_Disable,
+        Input_Mute,
         Input_Surround,
         Input_Mixed
     };
 
     extern void select_set_task(enum Select_Input task, uint8_t param);
     extern void select_run();
+    
 #ifdef	__cplusplus
 }
 #endif

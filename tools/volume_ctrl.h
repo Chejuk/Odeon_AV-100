@@ -25,8 +25,12 @@ extern "C" {
 #define CHANNEL_VOLUME_MAX  9
 
 
-    extern bool value_common(uint8_t Value);
-    extern bool value_channel(uint8_t num, int8_t value);
+//    extern bool value_common(uint8_t Value);
+//    extern bool value_channel(uint8_t num, int8_t value);
+    
+    extern void volume_set_task(uint8_t channel, int8_t value);
+    extern void volume_set_run();
+    
     extern void parameters_outval_add(uint8_t num, int8_t val);
 
 #ifdef	__cplusplus

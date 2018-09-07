@@ -35,7 +35,7 @@ extern "C" {
 #define LED_51      (1 << 0)
 #define LED_AUX     (1 << 1)
 #define LED_RADIO   (1 << 2)
-#define LED_21      (1 << 3)
+#define LED_MODE    (1 << 3)
 #define LED_POWER   (1 << 4)
 #define LED_MUTE    (1 << 5)
 #define LED_7       (1 << 6)
@@ -52,6 +52,7 @@ extern "C" {
     
     extern uint8_t disp[5];
     extern const uint8_t symbols[];
+    extern volatile uint8_t portA;
     
     extern void leds_init();
     extern void leds_next();

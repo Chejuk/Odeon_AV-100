@@ -13,20 +13,40 @@ extern "C" {
 #endif
     
 #include <htc.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #ifndef _XTAL_FREQ
 #define _XTAL_FREQ 20000000
 #endif
-
  
 #define MAINT_INTERRUPT_TIMEOUT_MS  4
-#define TEST(x) PORTBbits.RB3 = x
+    
+#define TEST(x)     RB3 = x
+#define Mute_Off    RA5
+    
+    enum State {
+        State_Off,
+        State_On,
+        State_Volume,
+        State_Channel_Vol,
+    };
+    
+#ifdef _DEBUG_
+extern uint8_t debug_value;
+#endif
     
     extern volatile uint8_t portA;
-    //extern volatile uint16_t dVal;
+    extern enum State state; 
+ //   extern bool mute_on;
+    extern uint8_t  channel_num;
 
-    extern void main_run();
+    extern void channel_out_view();
+    extern void channel_value_view();
+
+//    extern void main_run();
     extern void timer_interrupt_run();
+    
 
 
 #ifdef	__cplusplus

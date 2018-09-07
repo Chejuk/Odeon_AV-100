@@ -14,10 +14,10 @@
 #include "tools.h"
 #include "inputset.h"
 
-static const uint8_t    eeprom_address = 0xA0;//0x94;//0xA0;
-static bool             eeprom_enable = false;
-static bool             eeprom_valid = false;
-static uint8_t eeprom_data[16];
+//static const uint8_t    eeprom_address = 0xA0;//0x94;//0xA0;
+//static bool             eeprom_enable = false;
+//static bool             eeprom_valid = false;
+//static uint8_t eeprom_data[16];
 
 #define FLAG    0x0D
 #define START_ADDRESSES 0x02

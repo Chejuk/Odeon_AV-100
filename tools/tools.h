@@ -17,11 +17,6 @@
 extern "C" {
 #endif
     
-    struct Task_Input {
-        enum Select_Input type;
-        uint8_t param;
-    };
-
     extern struct Save_Parameters  parameters;
 
     extern void encoder_init();

@@ -14,7 +14,7 @@
 #include "../init.h"
 
 
-static uint32_t counter_timer1 = 0;
+//static uint32_t counter_timer1 = 0;
 
 static enum {
     Idle,
@@ -208,6 +208,7 @@ void ir_setIdle()
     ir_puls.start = false;
     ir_puls.stop = false;
     ir_puls.repeate = false;
+//    ir_puls.value = 0;
     IR_State = Idle;   
     TEST(1);
 }
@@ -219,9 +220,10 @@ bool ir_check()
     if(ir_puls.start) //(IR_State != Idle) 
     {
         ir_start_count++;
-        if(ir_start_count > (uint8_t) (100 / MAINT_INTERRUPT_TIMEOUT_MS)) {
+        if(ir_start_count > (uint8_t) (85 / MAINT_INTERRUPT_TIMEOUT_MS)) {
             ir_setIdle(); 
             ir_start_count = 0;
+            ir_puls.value = 0;
         };
         return true;
     } else {
@@ -240,7 +242,13 @@ uint8_t ir_code_get()
     if(ir_puls.new) {
         static uint8_t ir_code_prev = 0;
         uint8_t code = ir_puls.code;
+ 
+        if((code == ir_code_prev) && (power_on_timer > 0)) {
+            code = 0;
+        } else 
+            power_on_timer = 250 / MAINT_INTERRUPT_TIMEOUT_MS;
         
+        /*
         if(code == CODE_ST_BY) {
             if((code == ir_code_prev) && (power_on_timer > 0)) {
                 code = 0;
@@ -248,6 +256,7 @@ uint8_t ir_code_get()
         } else {
             power_on_timer = 0;
         };
+         */         
         
         ir_setIdle();
         ir_code_prev = ir_puls.code;               

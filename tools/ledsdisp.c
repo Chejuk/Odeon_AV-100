@@ -38,7 +38,6 @@ const uint8_t symbols[] = {(LED_A | LED_B | LED_C | LED_D | LED_E | LED_F),
 uint8_t disp[5] = {0,0,0,0,0};
 volatile uint8_t portA = 0xFF;
 
-
 void leds_init()
 {
     PORTC = 0x00;
@@ -71,13 +70,22 @@ void leds_next()
     switch (c_rank) {
     case 0: 
         portA &= ~0x04;
+//        RA1 = 1;
+//        RA2 = 0;
+//        RA3 = 1;
         break;
     case 1:
         portA &= ~0x08;
-        break;
+//        RA1 = 1;
+//        RA2 = 1;
+//        RA3 = 0;
+         break;
     case 2:
         portA &= ~0x02;
-        break;
+//        RA1 = 0;
+//        RA2 = 1;
+//        RA3 = 1;
+         break;
     case 3:
         RB0 = 0;
         break;

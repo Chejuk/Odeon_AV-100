@@ -13,23 +13,19 @@
 #include "tools/tools.h"
 #include "tools/ir.h"
 #include "tools/ledsdisp.h"
-#include "eeprom.h"
+#include "tools/eeprom.h"
 #include "tools/volume_ctrl.h"
 
-enum State {
-    State_Off,
-    State_On,
-    State_Volume,
-    State_Channel_Vol,
-};
 
-static enum State state; 
+enum State state; 
 static bool mute_on = false;
-static uint8_t  channel_num = 0;
+static bool mode_on = false;
+uint8_t  channel_num = 0;
 
 void channel_out_view();
 void channel_value_view();
 
+/*
 // Main loop algorithm run function
 void main_run()
 {    
@@ -45,6 +41,7 @@ void main_run()
         led_switch(LED_7 | LED_8, true);
         symbol_setValue(parameters.Value);
         channel_out_view();
+//        volume_set_run();
     }; break;
         
     case State_Channel_Vol: {
@@ -62,15 +59,18 @@ void main_run()
         };
         
         channel_value_view();
-         
+        volume_set_run();
     }; break;
      
     default:
         state = State_Off;
     }
     
+    select_run();
+    
     if(!mute_on) led_switch(LED_MUTE , false);
 }
+ */
 
 // Timer interrupt algorithm run function
 void timer_interrupt_run()
@@ -85,9 +85,16 @@ void timer_interrupt_run()
     enVal += encoder_inc();
     
     //leds_next();        
-    ir_code = ir_code_get();
     
-    if(!ir_check()) leds_next();
+    if(ir_check()) return;
+        leds_next();
+    
+    ir_code = ir_code_get();
+#ifdef _DEBUG_
+    if(ir_code)
+        debug_value = ir_code;
+#endif
+
     
     if(mute_on) {
         mute_timer++;
@@ -95,7 +102,12 @@ void timer_interrupt_run()
             led_switch(LED_MUTE , true);
         else if(mute_timer < (400 / MAINT_INTERRUPT_TIMEOUT_MS))
             led_switch(LED_MUTE , false);
-        else mute_timer = 0;        
+        else mute_timer = 0; 
+        //Mute_Off = 1;
+        portA |= (1 << 5);
+    } else {
+        //Mute_Off = 0;
+        portA &= ~(1 << 5);
     };
    
     //State select
@@ -106,21 +118,33 @@ void timer_interrupt_run()
         if(enVal != 0) {
             state = State_Volume;
             enVal = 0;
+            select_set_task(Input_Set, parameters.Input);
+            mute_on = false;
+            select_set_task(Input_Mute, 0);
+            volume_set_task(4, parameters.Value);
+            select_set_task(Input_Surround, 0);
         }
     }; break; 
     
     case State_Volume : {
-        if(ir_code == CODE_ST_BY)
+        if(ir_code == CODE_ST_BY) {
             state = State_Off;
-        else if(ir_code == CODE_VOLUME_UP)
+            volume_set_task(4, 0);
+            select_set_task(Input_Mute, 1);
+            mute_on = false;
+            
+        } else if(ir_code == CODE_VOLUME_UP)
             enVal++;
         else if(ir_code == CODE_VOLUME_DOWN)
             enVal--;
         else if(ir_code == CODE_INPUT_SEL) {
             parameters.Input += 1;
             if(parameters.Input > 3) parameters.Input = 0;
+            select_set_task(Input_Set, parameters.Input);
         } else if(ir_code == CODE_MUTE) {
             mute_on = !mute_on;
+            select_set_task(Input_Mute, (mute_on)?1:0);
+            if(!mute_on) led_switch(LED_MUTE , false);
         } else if(ir_code == CODE_CHANNEL_UP) {
             channel_num++;
             if(channel_num > 5) channel_num = 0;
@@ -131,20 +155,29 @@ void timer_interrupt_run()
             else channel_num = 5;
             state = State_Channel_Vol;
             channel_timeout = 0;
+        } else if(ir_code == CODE_MODE) {
+            mode_on = !mode_on;
+            if(mode_on) 
+                led_switch(LED_MODE , true);
+            else led_switch(LED_MODE , false);
+            select_set_task(Input_Surround, (mode_on)?1:0);
         };
-            
+                    
         if(enVal != 0) {
             uint8_t pv = parameters.Value;
-            parameters.Value += enVal;
-            if(parameters.Value > 80) 
-                parameters.Value = 80;
-            else if(parameters.Value < 0)
+            parameters.Value += enVal;             
+            if(parameters.Value < 0)
                 parameters.Value = 0;
+            else if(parameters.Value > 80) 
+                parameters.Value = 80;
+            
             enVal = 0;
             if(pv != parameters.Value) {
                 change_counter = 0;
             };
+            volume_set_task(4, parameters.Value);
         }; 
+               
     }; break;
   
     case State_Channel_Vol: {
@@ -165,6 +198,7 @@ void timer_interrupt_run()
         else if(ir_code == CODE_RESET) {
             channel_timeout = 0;
             memset(&parameters.OutValues, 0, 6);
+            volume_set_task(4, parameters.Value);
         } else if(ir_code == CODE_MUTE) {
             mute_on = !mute_on;
         } else if(ir_code == CODE_INPUT_SEL) {
@@ -186,7 +220,7 @@ void timer_interrupt_run()
                 parameters_outval_add(VOLUME_FL - 1, enVal);
                 parameters_outval_add(VOLUME_FR - 1, enVal);                
             };
-            
+            volume_set_task(4, parameters.Value);
             enVal = 0;
         };
         
@@ -196,7 +230,7 @@ void timer_interrupt_run()
     };
     }
     
-    if(change_counter < (uint16_t) (500 / MAINT_INTERRUPT_TIMEOUT_MS)) {
+    if(change_counter < (uint16_t) (3000 / MAINT_INTERRUPT_TIMEOUT_MS)) {
         change_counter++;
     } else if(change_counter < 0xF000) {
         parameters_write();

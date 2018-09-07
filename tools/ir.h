@@ -1,8 +1,8 @@
 /* 
  * File:   ir.h
- * Author: root
+ * Author: Anatoly Palto
  *
- * Created on 7 ????? 2018 ?., 11:02
+ * Created on 7 march 2018, 11:02
  */
 
 #ifndef IR_H
@@ -35,7 +35,7 @@
 #define CODE_MUTE            (uint8_t) 130
 #define CODE_INPUT_SEL       (uint8_t) 132
 #define CODE_RESET           (uint8_t) 134
-#define CODE_MODE            (uint8_t) 135
+#define CODE_MODE            (uint8_t) 136
 #define CODE_AM_FM           (uint8_t) 138
 #define CODE_TUNE_PR         (uint8_t) 140
 #define CODE_TUNE_NX         (uint8_t) 142
