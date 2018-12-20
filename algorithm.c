@@ -25,53 +25,6 @@ uint8_t  channel_num = 0;
 void channel_out_view();
 void channel_value_view();
 
-/*
-// Main loop algorithm run function
-void main_run()
-{    
-    switch (state) {
-    case State_Off : {
-       leds_clr();
-       led_switch(LED_POWER, true);
-       led_switch(LED_7 | LED_8, false);
-    }; break;
-        
-    case State_Volume: {
-        led_switch(LED_POWER, false);
-        led_switch(LED_7 | LED_8, true);
-        symbol_setValue(parameters.Value);
-        channel_out_view();
-//        volume_set_run();
-    }; break;
-        
-    case State_Channel_Vol: {
-        led_switch(LED_POWER, false);
-        led_switch(LED_7 | LED_8, true);
-        
-        if(channel_num == 0) {
-            symbol_setValue(parameters.OutValues[VOLUME_SUB - 1]);
-        } else if(channel_num == 1) {
-            symbol_setValue(parameters.OutValues[VOLUME_SL - 1]);
-        } else if(channel_num == 2) {
-            symbol_setValue(parameters.OutValues[VOLUME_CT - 1]);
-        } else if(channel_num == 3) {
-            symbol_setValue(parameters.OutValues[VOLUME_FL - 1]);
-        };
-        
-        channel_value_view();
-        volume_set_run();
-    }; break;
-     
-    default:
-        state = State_Off;
-    }
-    
-    select_run();
-    
-    if(!mute_on) led_switch(LED_MUTE , false);
-}
- */
-
 // Timer interrupt algorithm run function
 void timer_interrupt_run()
 {
@@ -84,17 +37,14 @@ void timer_interrupt_run()
     
     enVal += encoder_inc();
     
-    //leds_next();        
-    
     if(ir_check()) return;
         leds_next();
     
     ir_code = ir_code_get();
-//#ifdef _DEBUG_
-//    if(ir_code)
-//        debug_value = ir_code;
-//#endif
-
+#ifdef _DEBUG_
+    if(ir_code)
+        debug_value = ir_code;
+#endif
     
     if(mute_on) {
         mute_timer++;
@@ -137,7 +87,8 @@ void timer_interrupt_run()
             enVal++;
         else if(ir_code == CODE_VOLUME_DOWN)
             enVal--;
-        else if(ir_code == CODE_INPUT_SEL) {
+        else if((ir_code == CODE_INPUT_SEL) 
+                || input_key_push())  {
             parameters.Input += 1;
             if(parameters.Input > 3) parameters.Input = 0;
             select_set_task(Input_Set, parameters.Input);

@@ -49,7 +49,6 @@ void ir_init()
     
     PEIE = 1;
 
-//    GO_DONE = 1; //Start ADC conversion
 }
 
 void ir_isr()
@@ -76,38 +75,34 @@ void ir_isr()
     }
     
     switch (IR_State) {
-    case Start:
-        if(!isLow) {
-            if((timeout > (uint16_t) (TIMEOUT_START - TIMEOUT_ACC)) 
-                && (timeout < (uint16_t) (TIMEOUT_START + TIMEOUT_ACC))
+    case Start: 
+        if(!isLow) {            
+            if((timeout > TIMEOUT_START_MIN) 
+                && (timeout < TIMEOUT_START_MAX)
                 ) {
                 IR_State = Prep;
                 prevTimer = tmr;
                 ir_puls.start = true;
                 TEST(1);
-#ifdef _DEBUG_
-        debug_value = (uint8_t) (timeout - 6980);
-#endif
 
-            } else if((timeout > (uint16_t) (TIMEOUT_REPEATE_START - TIMEOUT_ACC)) 
-              && (timeout < (uint16_t) (TIMEOUT_REPEATE_START + TIMEOUT_ACC))
+            } else if((timeout > TIMEOUT_REPEATE_MIN) 
+              && (timeout < TIMEOUT_REPEATE_MAX)
                 ){
                 IR_State = Repeate_Prep;
                 prevTimer = tmr;
                 ir_puls.start = true;
-                TEST(1);
-#ifdef _DEBUG_
-debug_value = (uint8_t) (timeout - 6980);
-#endif
+                TEST(1);                
+
             } else {
+                TEST(0); 
                 IR_State = Idle;
             };
-        }; break;
+        };break;
             
     case Prep:
         if(isLow) {
-            if((timeout > (TIMEOUT_PREP - TIMEOUT_ACC)) 
-                && (timeout < (TIMEOUT_PREP + TIMEOUT_ACC))
+            if((timeout > TIMEOUT_PREP_MIN) 
+                && (timeout < TIMEOUT_PREP_MAX)
                 ){
                 IR_State = Puls_low;
                 ir_puls.start = true;
@@ -115,7 +110,11 @@ debug_value = (uint8_t) (timeout - 6980);
                 ir_puls.count = 0;
                 prevTimer = tmr;
                 TEST(0);
-       };
+            } else {
+                //IR_State = Idle;
+                ir_setIdle();
+                TEST(1);
+            };
         }; break;
             
     case Puls_low:
@@ -132,13 +131,13 @@ debug_value = (uint8_t) (timeout - 6980);
                     ir_puls.start = false;
                     IR_State = Idle;
                     ir_puls.code = (uint8_t) (ir_puls.value & 0x000000FF);
-//                    if(tv != dVal) dVal = tv;
-
                 } else {
                     ir_puls.count += 1;
                     ir_puls.value <<= 1; 
                     IR_State = Puls_high;
-                }           
+                };       
+            } else {
+                TEST(0);
             };
         }; break;
             
@@ -146,7 +145,9 @@ debug_value = (uint8_t) (timeout - 6980);
         if(isLow){
             if((timeout > (uint16_t) (TIMEOUT_VAL_HIGH + TIMEOUT_ACC)) 
                 && ir_puls.start){
+                //IR_State = Idle;
                 ir_setIdle();
+                TEST(1);
                 
             } else if((timeout > (uint16_t) (TIMEOUT_VAL_HIGH - TIMEOUT_ACC)) // TIMEOUT_ACC
               && (timeout < (uint16_t) (TIMEOUT_VAL_HIGH + TIMEOUT_ACC))
@@ -162,8 +163,9 @@ debug_value = (uint8_t) (timeout - 6980);
                 prevTimer = tmr;
                 IR_State = Puls_low;
                 TEST(0);
-            };// else  state = Idle;
-        };break;
+            };
+        };
+        break;
             
     case Repeate_Prep:{
         prevTimer = tmr;
@@ -180,9 +182,6 @@ debug_value = (uint8_t) (timeout - 6980);
         IR_State = Idle;
 
         ir_puls.code = (uint8_t) (ir_puls.value & 0x000000FF);
-        //uint8_t tv = (uint8_t) (ir_puls.value & 0x000000FF);
-//        if(tv != dVal) dVal = tv;
-
         }; break;
         
     case Idle:
@@ -195,9 +194,7 @@ debug_value = (uint8_t) (timeout - 6980);
             ir_puls.stop = false;
             ir_puls.repeate = false; 
             TEST(0);
-//            dVal = 0;
         };
- //       dVal = 0;
     };
            
 //    GO_DONE = 1;// start next conversion
@@ -209,7 +206,6 @@ void ir_setIdle()
     ir_puls.start = false;
     ir_puls.stop = false;
     ir_puls.repeate = false;
-//    ir_puls.value = 0;
     IR_State = Idle;   
     TEST(1);
 }
@@ -237,8 +233,15 @@ return false;
 uint8_t ir_code_get()
 {
     static uint16_t power_on_timer = 0;
+    static uint16_t  idle_counter = 0;
 
     if(power_on_timer) power_on_timer--;
+    
+    if(idle_counter > 0) idle_counter--;
+    else if(IR_State == Idle) {
+        ir_puls.value = 0;
+        ir_puls.code = 0;
+    };
     
     if(ir_puls.new) {
         static uint8_t ir_code_prev = 0;
@@ -247,7 +250,7 @@ uint8_t ir_code_get()
         if((code == ir_code_prev) && (power_on_timer > 0)) {
             code = 0;
         } else 
-            power_on_timer = 250 / MAINT_INTERRUPT_TIMEOUT_MS;
+            power_on_timer = 200 / MAINT_INTERRUPT_TIMEOUT_MS;
         
         /*
         if(code == CODE_ST_BY) {
@@ -260,7 +263,8 @@ uint8_t ir_code_get()
          */         
         
         ir_setIdle();
-        ir_code_prev = ir_puls.code;               
+        ir_code_prev = ir_puls.code;  
+        idle_counter = (uint16_t) (1000/MAINT_INTERRUPT_TIMEOUT_MS);
         return code;
     };
     

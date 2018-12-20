@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "../init.h"
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
@@ -37,11 +39,13 @@ extern "C" {
         Input_Set,
         Input_Mute,
         Input_Surround,
-        Input_Mixed
+        Input_Mixed,
     };
 
     extern void select_set_task(enum Select_Input task, uint8_t param);
     extern void select_run();
+    
+    extern bool input_key_push();
     
 #ifdef	__cplusplus
 }

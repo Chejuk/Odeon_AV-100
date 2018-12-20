@@ -42,9 +42,14 @@ int main(int argc, char** argv) {
     TMR2ON = 1;     // timer2 ON   
     TMR2IE = 1;
     
+#ifdef _DEBUG_  
     //test pin PB3
     TRISB3 = 0;// PDB3 as output
+#else
+    TRISB3 = 1;// PDB3 as input; Audio input select
+#endif
     RB3 = 1;
+
     
     //Mute output pin
     TRISA5 = 0; //Set RA5 as output
@@ -60,17 +65,8 @@ int main(int argc, char** argv) {
     i2c_init();
     parameters_read();
     __delay_ms(400);
-    //eeprom_init();
 
     GIE = 1; //interrupt enable
-
-//    symbols_set4((uint16_t) ir_puls.value); 
-//    while(1) {};
-    
-//  uint8_t time = 0;
- //   volatile uint16_t disp = 0;
- 
- //   dVal =  9012;
     
     //Main loop
    	for(;;) {
@@ -88,7 +84,7 @@ int main(int argc, char** argv) {
             led_switch(LED_POWER, false);
             led_switch(LED_7 | LED_8, true);
 #ifdef _DEBUG_
-            symbols_set4(debug_value);
+            symbols_set4((uint8_t) debug_value);
 #else
             symbol_setValue(parameters.Value);
 #endif
@@ -121,8 +117,6 @@ int main(int argc, char** argv) {
         select_run();
     
  //       if(!mute_on) led_switch(LED_MUTE , false);//		CLRWDT();	// Idly kick the dog
-
-        
         __delay_ms(50);
     };
 
@@ -144,17 +138,10 @@ static void interrupt isr(void)	// Here be interrupt function - the name is unim
         //ADIF = 0;
         CMIF = 0;
     }   
-
     
     //Timer interrupt
     // On main timer tick
-    if(TMR2IF) {
-//        PORTBbits.RB3 = !PORTBbits.RB3;
-//        dVal += encoder_inc();
-//        //leds_next();        
-//        if(!ir_check()) 
-//            leds_next();
-        
+    if(TMR2IF) {        
         timer_interrupt_run();
         TMR2IF = 0;
    };    

@@ -21,8 +21,13 @@ extern "C" {
 #endif
  
 #define MAINT_INTERRUPT_TIMEOUT_MS  4
-    
-#define TEST(x)     RB3 = x
+#define INPUT_KEY_TIMEOUTS          (250 / MAINT_INTERRUPT_TIMEOUT_MS)
+
+#ifdef _DEBUG_    
+    #define TEST(x)     RB3 = x
+#else
+    #define TEST(x)
+#endif
 #define Mute_Off    RA5
     
     enum State {

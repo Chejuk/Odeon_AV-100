@@ -74,3 +74,24 @@ void select_run()
     };
  
 }
+
+bool input_key_push()
+{
+#ifdef _DEBUG_
+    return false;
+#else
+    static uint16_t timer_counter = 0;
+    
+    if((RB3 == 0) && (timer_counter < (uint16_t) INPUT_KEY_TIMEOUTS * 2)) {
+        timer_counter++;
+    } else if(timer_counter){
+        timer_counter--;
+    };
+    
+    if(timer_counter > (uint16_t) INPUT_KEY_TIMEOUTS) {
+        timer_counter = 0;
+        return true;
+    }
+    else return false;
+#endif
+}

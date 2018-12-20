@@ -19,16 +19,25 @@
 #define TIMEOUT_IDLY    15000
 
 // 20 MHz /4 = 5MHz / prescale 8 = 625 kHz =>  1 msec = 625 tick
-#define TIMEOUT_START_MIN   7025
-#define TIMEOUT_START   (TIMEOUT_START_MIN + TIMEOUT_ACC / 2)//7021..7058:7040 +/- 19;       7188 = 11.5 msec
 
-#define TIMEOUT_PREP    3518 //3503 .. 3535: 3518 +/- 15;   2813 = 4.5 msec
+
+#define TIMEOUT_START_MIN   7043 // xoro up to 7020 (9msec); odeon up to 7024 (11,3 msec))
+#define TIMEOUT_START_MAX   7145//(TIMEOUT_START_MIN + TIMEOUT_ACC / 2)//7021..7058:7040 +/- 19;       7188 = 11.5 msec
+
+//#define TIMEOUT_REPEATE_START  5635 // 5527..5575;  9 msec
+#define TIMEOUT_REPEATE_MIN  5550 
+#define TIMEOUT_REPEATE_MAX  5690 
+
+
+//#define TIMEOUT_PREP    3518 //3503 .. 3535: 3518 +/- 15;   2813 = 4.5 msec
+#define TIMEOUT_PREP_MIN    3450 //3503 .. 3535: 3518 +/- 15;   2813 = 4.5 msec
+#define TIMEOUT_PREP_MAX    3580 
+
 #define TIMEOUT_LOW     371  //345 .. 397: 371 +/- 28;      406 = 0.65 msec
 
 #define TIMEOUT_VAL_HIGH    1055 //1028..1082: 1055 +/- 27; 1031 = 1.65 msec;
 #define TIMEOUT_VAL_LOW     359  //335..383; 359 +/- 24;    313 = 0.5 msec
 
-#define TIMEOUT_REPEATE_START  5635 // 5527..5575;  9 msec
 //#define TIMEOUT_REPEATE_PREP   390   // 2.2 msec
 //#define TIMEOUT_REPEATE_LOW         // 0.6 msec
 
